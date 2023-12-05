@@ -9,6 +9,7 @@ import UIKit
 
 final class ProfileViewController: UIViewController {
     
+    // MARK: - Private Properties
     private var avatarImageView: UIImageView = {
         let viewImageAvatar = UIImageView()
         viewImageAvatar.image = UIImage(named: "avatar")
@@ -57,6 +58,7 @@ final class ProfileViewController: UIViewController {
         return buttonLogout
     }()
     
+    // MARK: - View Life Cycles
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -76,6 +78,7 @@ final class ProfileViewController: UIViewController {
         logoutButtonSetup()
     }
     
+    // MARK: - Public Methods
     func avatarImageViewSetup() {
         avatarImageView.layer.masksToBounds = true
         avatarImageView.layer.cornerRadius = 35
@@ -107,6 +110,7 @@ final class ProfileViewController: UIViewController {
         logoutButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16).isActive = true
     }
     
+    // MARK: - Private Methods
     @objc
     private func didTapLogoutButton() {}
 }

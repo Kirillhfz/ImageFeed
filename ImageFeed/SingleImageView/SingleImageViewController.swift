@@ -9,6 +9,11 @@ import UIKit
 
 final class SingleImageViewController: UIViewController {
     
+    // MARK: - IB Outlets
+    @IBOutlet private weak var scrollView: UIScrollView!
+    @IBOutlet private weak var imageView: UIImageView!
+    
+    // MARK: - Public Properties
     var image: UIImage! {
         didSet {
             guard isViewLoaded else { return }
@@ -17,21 +22,12 @@ final class SingleImageViewController: UIViewController {
         }
     }
     
-    @IBOutlet weak var scrollView: UIScrollView!
-    @IBOutlet private var imageView: UIImageView!
-    
+    // MARK: - IB Actions
     @IBAction private func didTapBackButton(_ sender: Any) {
         dismiss(animated: true)
     }
     
-    @IBAction func didTapShareButton(_ sender: Any) {
-        let share = UIActivityViewController(
-            activityItems: [image as Any],
-            applicationActivities: nil
-        )
-        present(share, animated: true, completion: nil)
-    }
-    
+    // MARK: - View Life Cycles
     override func viewDidLoad() {
         super.viewDidLoad()
         scrollView.minimumZoomScale = 0.1
@@ -40,6 +36,16 @@ final class SingleImageViewController: UIViewController {
         rescaleAndCenterImageInScrollView(image: image)
     }
     
+    // MARK: - IB Actions
+    @IBAction private func didTapShareButton(_ sender: Any) {
+        let share = UIActivityViewController(
+            activityItems: [image as Any],
+            applicationActivities: nil
+        )
+        present(share, animated: true, completion: nil)
+    }
+    
+    // MARK: - Private Methods
     private func rescaleAndCenterImageInScrollView(image: UIImage) {
         let minZoomScale = scrollView.minimumZoomScale
         let maxZoomScale = scrollView.maximumZoomScale
@@ -56,9 +62,9 @@ final class SingleImageViewController: UIViewController {
         let y = (newContentSize.height - visibleRectSize.height) / 2
         scrollView.setContentOffset(CGPoint(x: x, y: y), animated: false)
     }
-    
 }
 
+   // MARK: - UIScrollViewDelegate
 extension SingleImageViewController: UIScrollViewDelegate {
     func viewForZooming(in scrollView: UIScrollView) -> UIView? {
         imageView
