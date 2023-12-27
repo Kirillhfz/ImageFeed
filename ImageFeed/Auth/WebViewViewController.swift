@@ -11,19 +11,21 @@ import WebKit
 
 fileprivate let UnsplashAuthorizeURLString = "https://unsplash.com/oauth/authorize"
 
-protocol WebViewViewControllerDelegate: AnyObject {
-    func webViewViewController(_ vc: WebViewViewController, didAuthenticateWithCode code: String)
-    func webViewViewControllerDidCancel(_ vc: WebViewViewController)
+protocol WebViewControllerDelegate: AnyObject {
+    func webViewViewController(_ vc: WebViewController, didAuthenticateWithCode code: String)
+    func webViewViewControllerDidCancel(_ vc: WebViewController)
 }
 
-final class WebViewViewController: UIViewController {
+final class WebViewController: UIViewController {
     
     // MARK: - IB Outlets
     @IBOutlet private var webView: WKWebView!
     @IBOutlet private weak var progressView: UIProgressView!
     
-    // MARK: - Public Properties
-    weak var delegate: WebViewViewControllerDelegate?
+    //MARK: - Properties
+    weak var delegate: WebViewControllerDelegate?
+    private var estimatedProgressObservation: NSKeyValueObservation?
+    private var alertPresenter: AlertPresenterProtocol?
     
     // MARK: - View Life Cycles
     override func viewDidLoad() {
@@ -31,16 +33,25 @@ final class WebViewViewController: UIViewController {
         
         webView.navigationDelegate = self
         
-        var urlComponents = URLComponents(string: UnsplashAuthorizeURLString)!
-        urlComponents.queryItems = [
-           URLQueryItem(name: "client_id", value: AccessKey),
-           URLQueryItem(name: "redirect_uri", value: RedirectURI),
-           URLQueryItem(name: "response_type", value: "code"),
-           URLQueryItem(name: "scope", value: AccessScope)
-         ]
-        let url = urlComponents.url!
+        estimatedProgressObservation = webView.observe(
+            \.estimatedProgress,
+             options: [],
+             changeHandler: { [weak self] _, _ in
+                 guard let self = self else { return }
+                 self.updateProgress()
+             })
         
+        var urlComponents = URLComponents(string: KeyAndUrl.unsplashAuthorizeUrlString)!
+        urlComponents.queryItems = [
+            URLQueryItem(name: "client_id", value: KeyAndUrl.accessKey),
+            URLQueryItem(name: "redirect_uri", value: KeyAndUrl.redirectUrl),
+            URLQueryItem(name: "response_type", value: "code"),
+            URLQueryItem(name: "scope", value: KeyAndUrl.accessScope)
+        ]
+        
+        guard let url = urlComponents.url else { return }
         let request = URLRequest(url: url)
+        
         webView.load(request)
         
         updateProgress()
@@ -48,7 +59,7 @@ final class WebViewViewController: UIViewController {
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-
+        
         webView.addObserver(
             self,
             forKeyPath: #keyPath(WKWebView.estimatedProgress),
@@ -75,6 +86,10 @@ final class WebViewViewController: UIViewController {
             super.observeValue(forKeyPath: keyPath, of: object, change: change, context: context)
         }
     }
+    
+    func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
+        showNetworkError()
+    }
 
     private func updateProgress() {
         progressView.progress = Float(webView.estimatedProgress)
@@ -82,7 +97,7 @@ final class WebViewViewController: UIViewController {
     }
 }
 // MARK: - WKNavigationDelegate
-extension WebViewViewController: WKNavigationDelegate {
+extension WebViewController: WKNavigationDelegate {
     func webView(
         _ webView: WKWebView,
         decidePolicyFor navigationAction: WKNavigationAction,
@@ -108,5 +123,21 @@ extension WebViewViewController: WKNavigationDelegate {
         } else {
             return nil
         }
+    }
+}
+
+//MARK: - AlertPresenter
+extension WebViewController {
+    private func showNetworkError() {
+        let alert = AlertModel(
+            title: "Что-то пошло не так(",
+            message: "Не удалось войти в систему",
+            buttonText: "Ок",
+            completion: { [weak self] in
+                guard let self = self else { return }
+                dismiss(animated: true)
+            })
+        alertPresenter = AlertPresenter(delegate: self)
+        alertPresenter?.showError(for: alert)
     }
 }
