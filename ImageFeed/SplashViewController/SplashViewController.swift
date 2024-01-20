@@ -82,9 +82,9 @@ extension SplashViewController: AuthViewControllerDelegate {
 
 extension SplashViewController {
     func authViewController(_ vc: AuthViewController, didAuthenticateWithCode code: String) {
+        UIBlockingProgressHUD.show()
         dismiss(animated: true) { [weak self] in
             guard let self = self else { return }
-            UIBlockingProgressHUD.show()
             self.fetchOAuthToken(code)
         }
     }
@@ -105,11 +105,12 @@ extension SplashViewController {
                 self.profileImageService.fetchProfileImageURL(username: username)  { _ in }
                 DispatchQueue.main.async {
                     self.showToTabBarController()
+                    UIBlockingProgressHUD.dismiss()
                 }
             case .failure:
                 self.showNetworkError()
+                UIBlockingProgressHUD.dismiss()
             }
-            UIBlockingProgressHUD.dismiss()
         }
     }
     
@@ -131,8 +132,8 @@ extension SplashViewController {
                 self.fetchProfile(token: token)
             case .failure:
                 self.showNetworkError()
+                UIBlockingProgressHUD.dismiss()
             }
-            UIBlockingProgressHUD.dismiss()
         }
     }
 }
