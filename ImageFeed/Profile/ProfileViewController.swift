@@ -6,10 +6,16 @@
 //
 
 import UIKit
+import Kingfisher
 
 final class ProfileViewController: UIViewController {
     
     // MARK: - Private Properties
+    private let oauth2TokenStorage = OAuth2TokenStorage()
+    private let profileService = ProfileService.shared
+    private let profileImageService = ProfileImageService.shared
+    private var profileImageServiceObserver: NSObjectProtocol? 
+    
     private var avatarImageView: UIImageView = {
         let viewImageAvatar = UIImageView()
         viewImageAvatar.image = UIImage(named: "avatar")
@@ -62,6 +68,8 @@ final class ProfileViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        view.backgroundColor = UIColor(red: 0.102, green: 0.106, blue: 0.133, alpha: 1)
+        
         view.addSubview(avatarImageView)
         avatarImageViewSetup()
         
@@ -76,9 +84,28 @@ final class ProfileViewController: UIViewController {
         
         view.addSubview(logoutButton)
         logoutButtonSetup()
+        
+        updateProfileDetails(profile: profileService.profile)
     }
     
     // MARK: - Public Methods
+    private func updateProfileDetails(profile: Profile?) {
+        guard let profile = profile else { return }
+        nameLabel.text = profile.name
+        loginNameLabel.text = profile.loginName
+        descriptionLabel.text = profile.bio
+        
+        profileImageServiceObserver = NotificationCenter.default.addObserver(
+            forName: ProfileImageService.didChangeNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            guard let self = self else { return }
+            self.loadAvatar()
+        }
+        loadAvatar()
+    }
+    
     func avatarImageViewSetup() {
         avatarImageView.layer.masksToBounds = true
         avatarImageView.layer.cornerRadius = 35
@@ -113,4 +140,26 @@ final class ProfileViewController: UIViewController {
     // MARK: - Private Methods
     @objc
     private func didTapLogoutButton() {}
+}
+
+private extension ProfileViewController {
+    func loadAvatar() {
+        guard
+            let avatarURL = profileImageService.avatarUrl,
+            let profleURL = URL(string: avatarURL) else { return }
+        
+        let cache = ImageCache.default
+        cache.clearMemoryCache()
+        cache.clearDiskCache()
+        
+        let processor = RoundCornerImageProcessor(cornerRadius: 61)
+        avatarImageView.kf.indicatorType = .activity
+        avatarImageView.kf.setImage(
+            with: profleURL,
+            placeholder: UIImage(named: "tab_profile_active"),
+            options: [.processor(processor)]
+        )
+        avatarImageView.layer.masksToBounds = true
+        avatarImageView.layer.cornerRadius = 34
+    }
 }
