@@ -37,9 +37,13 @@ final class ProfileService {
         self.task = task
         task.resume()
     }
+    
+    func clean() {
+            profile = nil
+        }
 }
 
-// MARK: - Methods
+// MARK: - Extension
 private extension ProfileService {
     func profileRequest(token: String) -> URLRequest {
         guard let url = URL(

@@ -8,13 +8,14 @@
 import UIKit
 import Kingfisher
 
-final class ProfileViewController: UIViewController {
+class ProfileViewController: UIViewController {
     
     // MARK: - Private Properties
     private let oauth2TokenStorage = OAuth2TokenStorage()
     private let profileService = ProfileService.shared
     private let profileImageService = ProfileImageService.shared
-    private var profileImageServiceObserver: NSObjectProtocol? 
+    private var profileImageServiceObserver: NSObjectProtocol?
+    private var alertPresenter: AlertPresenterProtocol?
     
     private var avatarImageView: UIImageView = {
         let viewImageAvatar = UIImageView()
@@ -53,10 +54,10 @@ final class ProfileViewController: UIViewController {
         return labelDescription
     }()
     
-    var  logoutButton: UIButton = {
+    lazy var logoutButton: UIButton = {
         let buttonLogout = UIButton.systemButton(
             with: UIImage(named: "logout_button") ?? UIImage(),
-            target: ProfileViewController.self,
+            target: self,
             action: #selector(Self.didTapLogoutButton)
         )
         buttonLogout.tintColor = UIColor(red: 0.961, green: 0.42, blue: 0.424, alpha: 1)
@@ -67,6 +68,8 @@ final class ProfileViewController: UIViewController {
     // MARK: - View Life Cycles
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        alertPresenter = AlertPresenter(delegate: self)
         
         view.backgroundColor = UIColor(red: 0.102, green: 0.106, blue: 0.133, alpha: 1)
         
@@ -139,9 +142,12 @@ final class ProfileViewController: UIViewController {
     
     // MARK: - Private Methods
     @objc
-    private func didTapLogoutButton() {}
+    private func didTapLogoutButton() {
+        showAlertExit()
+    }
 }
 
+// MARK: - Private Extension
 private extension ProfileViewController {
     func loadAvatar() {
         guard
@@ -161,5 +167,34 @@ private extension ProfileViewController {
         )
         avatarImageView.layer.masksToBounds = true
         avatarImageView.layer.cornerRadius = 34
+    }
+    
+    func exitProfile() {
+        OAuth2TokenStorage().token = nil
+        WebViewController.clean()
+        profileService.clean()
+        guard let window = UIApplication.shared.windows.first else {
+            fatalError("Invalid Configuration") }
+        window.rootViewController = SplashViewController()
+    }
+    
+    func showAlertExit() {
+        DispatchQueue.main.async {
+            let alert = AlertModel(
+                title: "Пока, пока!",
+                message: "Уверены, что хотите выйти?",
+                buttonText: "Да",
+                completion: { [weak self] in
+                    guard let self = self else { return }
+                    self.exitProfile()
+                },
+                nextButtonText: "Нет",
+                nextCompletion: { [weak self] in
+                    guard let self = self else { return }
+                    self.dismiss(animated: true)
+                })
+            
+            self.alertPresenter?.showAlert(for: alert)
+        }
     }
 }
