@@ -34,6 +34,8 @@
 		60459FC02B050E750097DC47 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 60459FBE2B050E750097DC47 /* LaunchScreen.storyboard */; };
 		604F55532B1FA83F00E0C0B4 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 604F55522B1FA83E00E0C0B4 /* Constants.swift */; };
 		6062714E2B1BA07200969349 /* ProfileViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6062714D2B1BA07200969349 /* ProfileViewController.swift */; };
+		60709D372B8B8040008144DE /* ImagesListService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60709D362B8B8040008144DE /* ImagesListService.swift */; };
+		60709D392B8B832E008144DE /* ImageListModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60709D382B8B832E008144DE /* ImageListModel.swift */; };
 		6080FCF42B11684C00FBD67C /* ImagesListCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6080FCF32B11684C00FBD67C /* ImagesListCell.swift */; };
 		609997CF2B21163F0011EB95 /* AuthViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 609997CE2B21163F0011EB95 /* AuthViewController.swift */; };
 		60D9EEA32B1BC8400044DC9B /* SingleImageViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60D9EEA22B1BC8400044DC9B /* SingleImageViewController.swift */; };
@@ -66,6 +68,8 @@
 		60459FC12B050E750097DC47 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		604F55522B1FA83E00E0C0B4 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		6062714D2B1BA07200969349 /* ProfileViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileViewController.swift; sourceTree = "<group>"; };
+		60709D362B8B8040008144DE /* ImagesListService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImagesListService.swift; sourceTree = "<group>"; };
+		60709D382B8B832E008144DE /* ImageListModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageListModel.swift; sourceTree = "<group>"; };
 		6080FCF32B11684C00FBD67C /* ImagesListCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImagesListCell.swift; sourceTree = "<group>"; };
 		609997CE2B21163F0011EB95 /* AuthViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthViewController.swift; sourceTree = "<group>"; };
 		60D9EEA22B1BC8400044DC9B /* SingleImageViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SingleImageViewController.swift; sourceTree = "<group>"; };
@@ -101,6 +105,7 @@
 				60069B012B3BE3F6004F6686 /* ProfileModel.swift */,
 				60069B032B3BE410004F6686 /* UserResultModel.swift */,
 				60069B052B3BE41F004F6686 /* ProfileImageModel.swift */,
+				60709D382B8B832E008144DE /* ImageListModel.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -183,6 +188,7 @@
 		6080FCF52B11687600FBD67C /* ImagesList */ = {
 			isa = PBXGroup;
 			children = (
+				60709D362B8B8040008144DE /* ImagesListService.swift */,
 				6080FCF32B11684C00FBD67C /* ImagesListCell.swift */,
 				60459FB72B050E740097DC47 /* ImagesListViewController.swift */,
 			);
@@ -297,6 +303,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				60709D372B8B8040008144DE /* ImagesListService.swift in Sources */,
 				60069B002B3BE3D4004F6686 /* ProfileResultModel.swift in Sources */,
 				602884F42B28E672007F1B08 /* OAuth2TokenStorage.swift in Sources */,
 				60069AF02B3B717A004F6686 /* ProfileService.swift in Sources */,
@@ -321,6 +328,7 @@
 				602884F02B28E5A1007F1B08 /* OAuth2Service.swift in Sources */,
 				60459FB62B050E740097DC47 /* SceneDelegate.swift in Sources */,
 				60069B092B3BE650004F6686 /* AlertPresenter.swift in Sources */,
+				60709D392B8B832E008144DE /* ImageListModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -550,8 +558,9 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/relatedcode/ProgressHUD";
 			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 13.6.1;
+				kind = versionRange;
+				maximumVersion = 13.8.4;
+				minimumVersion = 13.8.4;
 			};
 		};
 		60069AF32B3BDADC004F6686 /* XCRemoteSwiftPackageReference "Kingfisher" */ = {

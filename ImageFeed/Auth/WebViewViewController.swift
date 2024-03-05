@@ -88,7 +88,7 @@ final class WebViewController: UIViewController {
     }
     
     func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
-        showNetworkError()
+        showAlert()
     }
 
     private func updateProgress() {
@@ -128,7 +128,7 @@ extension WebViewController: WKNavigationDelegate {
 
 //MARK: - AlertPresenter
 extension WebViewController {
-    private func showNetworkError() {
+    private func showAlert() {
         let alert = AlertModel(
             title: "Что-то пошло не так(",
             message: "Не удалось войти в систему",
@@ -138,6 +138,15 @@ extension WebViewController {
                 dismiss(animated: true)
             })
         alertPresenter = AlertPresenter(delegate: self)
-        alertPresenter?.showError(for: alert)
+        alertPresenter?.showAlert(for: alert)
+    }
+    
+    static func clean() {
+        HTTPCookieStorage.shared.removeCookies(since: Date.distantPast)
+        WKWebsiteDataStore.default().fetchDataRecords(ofTypes: WKWebsiteDataStore.allWebsiteDataTypes()) { records in
+            records.forEach { record in
+                WKWebsiteDataStore.default().removeData(ofTypes: record.dataTypes, for: [record], completionHandler: {})
+            }
+        }
     }
 }

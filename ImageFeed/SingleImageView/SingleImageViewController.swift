@@ -14,12 +14,22 @@ final class SingleImageViewController: UIViewController {
     @IBOutlet private weak var imageView: UIImageView!
     
     // MARK: - Public Properties
-    var image: UIImage! {
+    var fullImageURL: URL! {
         didSet {
             guard isViewLoaded else { return }
-            imageView.image = image
-            rescaleAndCenterImageInScrollView(image: image)
+            receiveImage()
         }
+    }
+    
+    private var alertPresenter: AlertPresenterProtocol?
+    
+    // MARK: - View Life Cycles
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        scrollView.minimumZoomScale = 0.1
+        scrollView.maximumZoomScale = 1.25
+        alertPresenter = AlertPresenter(delegate: self)
+        receiveImage()
     }
     
     // MARK: - IB Actions
@@ -27,19 +37,10 @@ final class SingleImageViewController: UIViewController {
         dismiss(animated: true)
     }
     
-    // MARK: - View Life Cycles
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        scrollView.minimumZoomScale = 0.1
-        scrollView.maximumZoomScale = 1.25
-        imageView.image = image
-        rescaleAndCenterImageInScrollView(image: image)
-    }
-    
     // MARK: - IB Actions
     @IBAction private func didTapShareButton(_ sender: Any) {
         let share = UIActivityViewController(
-            activityItems: [image as Any],
+            activityItems: [imageView.image as Any],
             applicationActivities: nil
         )
         present(share, animated: true, completion: nil)
@@ -62,7 +63,23 @@ final class SingleImageViewController: UIViewController {
         let y = (newContentSize.height - visibleRectSize.height) / 2
         scrollView.setContentOffset(CGPoint(x: x, y: y), animated: false)
     }
+    
+    func receiveImage() {
+        UIBlockingProgressHUD.show()
+        imageView.kf.setImage(with: fullImageURL) { [weak self] result in
+            UIBlockingProgressHUD.dismiss()
+            
+            guard let self = self else { return }
+            switch result {
+            case .success(let imageResult):
+                self.rescaleAndCenterImageInScrollView(image: imageResult.image)
+            case .failure:
+                self.showAlert()
+            }
+        }
+    }
 }
+
 
    // MARK: - UIScrollViewDelegate
 extension SingleImageViewController: UIScrollViewDelegate {
@@ -71,3 +88,23 @@ extension SingleImageViewController: UIScrollViewDelegate {
     }
 }
 
+//MARK: - AlertPresenter
+extension SingleImageViewController {
+    private func showAlert() {
+        let alert = AlertModel(
+            title: "Что-то пошло не так(",
+            message: "Перезапустить загрузку?",
+            buttonText: "Ок",
+            completion: { [weak self] in
+                guard let self = self else { return }
+                UIBlockingProgressHUD.show()
+                receiveImage()
+            },
+            nextButtonText: "Нет",
+            nextCompletion: { [weak self] in
+                guard let self = self else { return }
+                self.dismiss(animated: true)
+            })
+        alertPresenter?.showAlert(for: alert)
+    }
+}
