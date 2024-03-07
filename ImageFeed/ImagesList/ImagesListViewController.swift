@@ -8,7 +8,13 @@
 import UIKit
 import Kingfisher
 
-final class ImagesListViewController: UIViewController {
+protocol ImagesListViewControllerProtocol: AnyObject {
+    var presenter: ImagesListViewPresenterProtocol? {get set}
+    func updateTableViewAnimated()
+    var photos: [Photo] {get set}
+}
+
+final class ImagesListViewController: UIViewController, ImagesListViewControllerProtocol {
     
     // MARK: - IB Outlets
     @IBOutlet private weak var tableView: UITableView!
@@ -24,6 +30,10 @@ final class ImagesListViewController: UIViewController {
         formatter.dateFormat = "dd MMMM yyyy"
         formatter.locale = Locale(identifier: "ru_RU")
         return formatter
+    }()
+    
+    lazy var presenter: ImagesListViewPresenterProtocol? = {
+        return ImageListViewPresenter()
     }()
     
     // MARK: - View Life Cycles
@@ -127,7 +137,7 @@ extension ImagesListViewController {
         }
     }
     
-    private func updateTableViewAnimated() {
+    internal func updateTableViewAnimated() {
         let oldCount = photos.count
         let newCount = imagesListService.photos.count
         photos = imagesListService.photos

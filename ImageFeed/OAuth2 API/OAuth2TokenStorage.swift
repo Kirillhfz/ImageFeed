@@ -8,7 +8,7 @@
 import Foundation
 import SwiftKeychainWrapper
 
-final class OAuth2TokenStorage {
+class OAuth2TokenStorage {
     
     static let shared = OAuth2TokenStorage()
     private let keychainKeeping = KeychainWrapper.standard
@@ -16,8 +16,6 @@ final class OAuth2TokenStorage {
     private enum Keys: String {
         case token
     }
-    
-    private let userDefaults = UserDefaults.standard
     
     var token: String? {
         get {
@@ -31,5 +29,6 @@ final class OAuth2TokenStorage {
             }
         }
     }
+    
     init() {}
 }

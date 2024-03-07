@@ -8,7 +8,16 @@
 import UIKit
 import Kingfisher
 
-class ProfileViewController: UIViewController {
+protocol ProfileViewControllerProtocol: AnyObject {
+    var presenter: ProfileViewPresenterProtocol { get set }
+    var nameLabel: UILabel { get set }
+    var loginNameLabel: UILabel { get set }
+    var descriptionLabel: UILabel { get set }
+    func loadAvatar()
+    func showAlertExit()
+}
+
+final class ProfileViewController: UIViewController & ProfileViewControllerProtocol {
     
     // MARK: - Private Properties
     private let oauth2TokenStorage = OAuth2TokenStorage()
@@ -17,7 +26,11 @@ class ProfileViewController: UIViewController {
     private var profileImageServiceObserver: NSObjectProtocol?
     private var alertPresenter: AlertPresenterProtocol?
     
-    private var avatarImageView: UIImageView = {
+    var presenter: ProfileViewPresenterProtocol = {
+        return ProfileViewPresenter()
+    }()
+    
+    var avatarImageView: UIImageView = {
         let viewImageAvatar = UIImageView()
         viewImageAvatar.image = UIImage(named: "avatar")
         viewImageAvatar.tintColor = .gray
@@ -27,7 +40,7 @@ class ProfileViewController: UIViewController {
 
     }()
     
-    private var nameLabel: UILabel = {
+    var nameLabel: UILabel = {
         let labelName = UILabel()
         labelName.text = "Екатерина Новикова"
         labelName.textColor = .white
@@ -36,7 +49,7 @@ class ProfileViewController: UIViewController {
         return labelName
     }()
     
-    private var loginNameLabel: UILabel = {
+    var loginNameLabel: UILabel = {
         let labelNameLogin = UILabel()
         labelNameLogin.text = "@ekaterina_nov"
         labelNameLogin.textColor = UIColor(red: 0.682, green: 0.686, blue: 0.706, alpha: 1)
@@ -45,7 +58,7 @@ class ProfileViewController: UIViewController {
         return labelNameLogin
     }()
     
-    private var descriptionLabel: UILabel = {
+    var descriptionLabel: UILabel = {
        let labelDescription = UILabel ()
         labelDescription.text = "Hello, World!"
         labelDescription.textColor = .white
@@ -88,25 +101,28 @@ class ProfileViewController: UIViewController {
         view.addSubview(logoutButton)
         logoutButtonSetup()
         
+        presenter.view = self
+        presenter.viewDidLoad()
+        
         updateProfileDetails(profile: profileService.profile)
     }
     
     // MARK: - Public Methods
-    private func updateProfileDetails(profile: Profile?) {
+    func updateProfileDetails(profile: Profile?) {
         guard let profile = profile else { return }
         nameLabel.text = profile.name
         loginNameLabel.text = profile.loginName
         descriptionLabel.text = profile.bio
         
-        profileImageServiceObserver = NotificationCenter.default.addObserver(
-            forName: ProfileImageService.didChangeNotification,
-            object: nil,
-            queue: .main
-        ) { [weak self] _ in
-            guard let self = self else { return }
-            self.loadAvatar()
-        }
-        loadAvatar()
+//        profileImageServiceObserver = NotificationCenter.default.addObserver(
+//            forName: ProfileImageService.didChangeNotification,
+//            object: nil,
+//            queue: .main
+//        ) { [weak self] _ in
+//            guard let self = self else { return }
+//            self.loadAvatar()
+//        }
+//        loadAvatar()
     }
     
     func avatarImageViewSetup() {
@@ -148,7 +164,7 @@ class ProfileViewController: UIViewController {
 }
 
 // MARK: - Private Extension
-private extension ProfileViewController {
+extension ProfileViewController {
     func loadAvatar() {
         guard
             let avatarURL = profileImageService.avatarUrl,
