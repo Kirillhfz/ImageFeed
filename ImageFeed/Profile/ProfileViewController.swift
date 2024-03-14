@@ -113,16 +113,6 @@ final class ProfileViewController: UIViewController & ProfileViewControllerProto
         nameLabel.text = profile.name
         loginNameLabel.text = profile.loginName
         descriptionLabel.text = profile.bio
-        
-//        profileImageServiceObserver = NotificationCenter.default.addObserver(
-//            forName: ProfileImageService.didChangeNotification,
-//            object: nil,
-//            queue: .main
-//        ) { [weak self] _ in
-//            guard let self = self else { return }
-//            self.loadAvatar()
-//        }
-//        loadAvatar()
     }
     
     func avatarImageViewSetup() {
@@ -210,7 +200,7 @@ extension ProfileViewController {
                     self.dismiss(animated: true)
                 })
             
-            self.alertPresenter?.showAlert(for: alert)
+            self.alertPresenter?.showError(for: alert)
         }
     }
 }

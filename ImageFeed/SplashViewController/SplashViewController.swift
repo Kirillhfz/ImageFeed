@@ -23,7 +23,7 @@ final class SplashViewController: UIViewController {
     var presenter: ProfileViewPresenterProtocol?
     private let spleshScreenLogoImageView: UIImageView = {
         let viewImageLogoScreenSplesh = UIImageView()
-        viewImageLogoScreenSplesh.image = UIImage(named: "SplashScreenLogo")
+        viewImageLogoScreenSplesh.image = UIImage(named: "splash_screen_logo")
         viewImageLogoScreenSplesh.translatesAutoresizingMaskIntoConstraints = false
         
         return viewImageLogoScreenSplesh
@@ -56,14 +56,6 @@ final class SplashViewController: UIViewController {
     // MARK: - Methods
     override var preferredStatusBarStyle: UIStatusBarStyle {
         .lightContent
-    }
-    
-    
-    private func switchToTabBarController() {
-        guard let window = UIApplication.shared.windows.first else { fatalError("Invalid Configuration") }
-        let tabBarController = UIStoryboard(name: "Main", bundle: .main)
-            .instantiateViewController(withIdentifier: "TabBarViewController")
-        window.rootViewController = tabBarController
     }
 }
 
@@ -108,12 +100,11 @@ extension SplashViewController {
                 self.profileImageService.fetchProfileImageURL(username: username)  { _ in }
                 DispatchQueue.main.async {
                     self.showToTabBarController()
-                    UIBlockingProgressHUD.dismiss()
                 }
             case .failure:
                 self.showAlert()
-                UIBlockingProgressHUD.dismiss()
             }
+            UIBlockingProgressHUD.dismiss()
         }
     }
     
@@ -149,7 +140,7 @@ extension SplashViewController {
             message: "Не удалось войти в систему",
             buttonText: "ОК",
             completion: { [weak self] in
-                guard self != nil else {
+                guard let self = self else {
                     return
                 }
                 oauth2TokenStorage.token = nil
@@ -157,6 +148,6 @@ extension SplashViewController {
                 profileService.clean()
             })
         switchToAuthViewController()
-        alertPresenter?.showAlert(for: alert)
+        alertPresenter?.showError(for: alert)
     }
 }

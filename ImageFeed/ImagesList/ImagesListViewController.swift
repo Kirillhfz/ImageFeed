@@ -39,18 +39,10 @@ final class ImagesListViewController: UIViewController, ImagesListViewController
     // MARK: - View Life Cycles
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        tableView.contentInset = UIEdgeInsets(top: 12, left: 0, bottom: 12, right: 0)
-        
+                
         alertPresenter = AlertPresenter(delegate: self)
-        imagesListServiceObserver = NotificationCenter.default.addObserver(
-            forName: ImagesListService.didChangeNotification,
-            object: nil,
-            queue: .main) { [weak self] _ in
-                guard let self = self else { return }
-                self.updateTableViewAnimated()
-            }
-        imagesListService.fetchPhotosNextPage()
+        presenter?.view = self
+        presenter?.viewDidLoad()
     }
 
     // MARK: - Public Methods
@@ -181,6 +173,6 @@ extension ImagesListViewController {
                 guard let self = self else { return }
                 dismiss(animated: true)
             })
-        alertPresenter?.showAlert(for: alert)
+        alertPresenter?.showError(for: alert)
     }
 }

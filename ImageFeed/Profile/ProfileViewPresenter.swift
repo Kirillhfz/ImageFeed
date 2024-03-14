@@ -29,9 +29,6 @@ final class ProfileViewPresenter: ProfileViewPresenterProtocol {
         OAuth2TokenStorage().token = nil
         profileService.cleanCookies()
         profileService.clean()
-        guard let window = UIApplication.shared.windows.first else {
-            fatalError("Invalid Configuration") }
-        window.rootViewController = SplashViewController()
     }
     
     func profileServiceObserver() {

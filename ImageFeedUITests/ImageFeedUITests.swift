@@ -7,14 +7,15 @@
 
 import XCTest
 
-final class ImageFeedUITests: XCTestCase {
+
+final class ImageFeedUITest: XCTestCase {
     
     private let fullNameLabel = ""
     private let userNameLabel = ""
     private let email = ""
     private let password = ""
     
-    private let app = XCUIApplication() // переменная приложения
+    private let app = XCUIApplication()
     
     override func setUpWithError() throws {
         continueAfterFailure = false
@@ -29,7 +30,7 @@ final class ImageFeedUITests: XCTestCase {
         let webView = app.webViews["UnsplashWebView"]
         
         XCTAssertTrue(webView.waitForExistence(timeout: 5))
-        
+
         let loginTextField = webView.descendants(matching: .textField).element
         XCTAssertTrue(loginTextField.waitForExistence(timeout: 5))
         
@@ -42,8 +43,7 @@ final class ImageFeedUITests: XCTestCase {
         
         passwordTextField.tap()
         passwordTextField.typeText(password)
-        webView.swipeUp()
-        sleep(3)
+        webView.tap()
         
         webView.buttons["Login"].tap()
         
@@ -52,7 +52,7 @@ final class ImageFeedUITests: XCTestCase {
         
         XCTAssertTrue(cell.waitForExistence(timeout: 5))
     }
-       
+    
     func testFeed() throws {
         let tablesQuery = app.tables
         
@@ -84,7 +84,7 @@ final class ImageFeedUITests: XCTestCase {
         let navBackButtonWhiteButton = app.buttons["nav back button white"]
         navBackButtonWhiteButton.tap()
     }
-       
+    
     func testProfile() throws {
         sleep(3)
         app.tabBars.buttons.element(boundBy: 1).tap()

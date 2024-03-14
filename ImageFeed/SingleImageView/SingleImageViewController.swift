@@ -105,6 +105,6 @@ extension SingleImageViewController {
                 guard let self = self else { return }
                 self.dismiss(animated: true)
             })
-        alertPresenter?.showAlert(for: alert)
+        alertPresenter?.showError(for: alert)
     }
 }

@@ -140,7 +140,7 @@ extension WebViewController {
                 dismiss(animated: true)
             })
         alertPresenter = AlertPresenter(delegate: self)
-        alertPresenter?.showAlert(for: alert)
+        alertPresenter?.showError(for: alert)
     }
     
     static func clean() {
