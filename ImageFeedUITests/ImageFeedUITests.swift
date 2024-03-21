@@ -6,20 +6,21 @@
 //
 
 import XCTest
-
+import Foundation
 
 final class ImageFeedUITest: XCTestCase {
     
-    private let fullNameLabel = ""
-    private let userNameLabel = ""
-    private let email = ""
-    private let password = ""
-    
     private let app = XCUIApplication()
+    
+    // MARK: - Внести свои данные
+
+    private let email = "" // email
+    private let password = "" // password
+    private let fullName = "" // first + last name
+    private let userName = "" // @nickname
     
     override func setUpWithError() throws {
         continueAfterFailure = false
-        
         app.launchArguments = ["testMode"]
         app.launch()
     }
@@ -42,6 +43,8 @@ final class ImageFeedUITest: XCTestCase {
         XCTAssertTrue(passwordTextField.waitForExistence(timeout: 5))
         
         passwordTextField.tap()
+        sleep(2)
+        passwordTextField.tap()
         passwordTextField.typeText(password)
         webView.tap()
         
@@ -58,29 +61,18 @@ final class ImageFeedUITest: XCTestCase {
         
         let cell = tablesQuery.children(matching: .cell).element(boundBy: 0)
         cell.swipeUp()
-        
-        sleep(3)
-        
-        let cellToLike = tablesQuery.descendants(matching: .cell).element(boundBy: 1)
-        
-        let likeButton = cellToLike.descendants(matching: .button).element(boundBy: 0)
-        
-        likeButton.tap()
-        
         sleep(2)
-        
-        likeButton.tap()
-        
+        let cellToLike = tablesQuery.children(matching: .cell).element(boundBy: 1)
         sleep(2)
-        
+        cellToLike.buttons["like button"].tap()
+        sleep(2)
+        cellToLike.buttons["like button"].tap()
+        sleep(2)
         cellToLike.tap()
-        
-        sleep(3)
-        
+        sleep(2)
         let image = app.scrollViews.images.element(boundBy: 0)
         image.pinch(withScale: 3, velocity: 1)
         image.pinch(withScale: 0.5, velocity: -1)
-        
         let navBackButtonWhiteButton = app.buttons["nav back button white"]
         navBackButtonWhiteButton.tap()
     }
@@ -89,8 +81,8 @@ final class ImageFeedUITest: XCTestCase {
         sleep(3)
         app.tabBars.buttons.element(boundBy: 1).tap()
         
-        XCTAssertTrue(app.staticTexts["\(fullNameLabel)"].exists)
-        XCTAssertTrue(app.staticTexts["\(userNameLabel)"].exists)
+        XCTAssertTrue(app.staticTexts["\(fullName)"].exists)
+        XCTAssertTrue(app.staticTexts["\(userName)"].exists)
         
         app.buttons["logout button"].tap()
         

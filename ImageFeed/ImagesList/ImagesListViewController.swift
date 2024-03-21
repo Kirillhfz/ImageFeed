@@ -117,11 +117,10 @@ extension ImagesListViewController {
                 cell.dateLabel.text = ""
             }
             let isLiked = imagesListService.photos[indexPath.row].isLiked == false
-            
-        let likeImage = isLiked ? UIImage(named: "like_button_off") : UIImage(named: "like_button_on")
-        cell.likeButton.setImage(likeImage, for: .normal)
+            let likeImage = isLiked ? UIImage(named: "like_button_off") : UIImage(named: "like_button_on")
+            cell.likeButton.setImage(likeImage, for: .normal)
+        }
     }
-}
     
     func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
         if indexPath.row + 1 == imagesListService.photos.count {
@@ -147,13 +146,14 @@ extension ImagesListViewController: ImagesListCellDelegate {
         guard let indexPath = tableView.indexPath(for: cell) else { return }
         let photo = photos[indexPath.row]
         UIBlockingProgressHUD.show()
-        imagesListService.changeLike(
+        presenter?.addPhotoLike(
             photoId: photo.id,
             isLike: photo.isLiked) { [weak self] result in
                 guard let self else { return }
                 switch result {
                 case .success:
-                    self.photos = self.imagesListService.photos
+                    guard let newPhotos = self.presenter?.imagesListService.photos else {return}
+                    self.photos = newPhotos
                     cell.setIsLiked(isLiked: self.photos[indexPath.row].isLiked)
                 case .failure:
                     self.showAlert()

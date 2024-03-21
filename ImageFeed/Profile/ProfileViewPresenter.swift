@@ -7,7 +7,6 @@
 
 import Foundation
 import WebKit
-import UIKit
 
 protocol ProfileViewPresenterProtocol {
     var view: ProfileViewControllerProtocol? { get set }

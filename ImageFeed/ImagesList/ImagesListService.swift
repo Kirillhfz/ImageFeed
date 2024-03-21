@@ -24,10 +24,17 @@ final class ImagesListService {
     // MARK: - Public Methods
     func fetchPhotosNextPage() {
         assert(Thread.isMainThread)
+        
         guard task == nil else { return }
         let nextPage = lastLoadedPage == nil ? 1 : lastLoadedPage! + 1
+        
         guard let token = oauth2TokenStorage.token else { return }
-        guard let request = imageTokenRequest(token, page: String(nextPage), perPage: "10") else { return }
+        
+        guard let request = imageTokenRequest(token, page: String(nextPage), perPage: "10") else {
+            assertionFailure("Не верный запрос")
+            return
+        }
+        
         let task = urlSession.objectTask(for: request){ [weak self] (result: Result<[PhotoResult], Error>) in
             DispatchQueue.main.async {
                 guard let self = self else { return }
@@ -56,9 +63,10 @@ final class ImagesListService {
                             object: self,
                             userInfo: ["Images" : self.photos])
                     self.task = nil
-                case .failure:
-                    assertionFailure("No images")
+                case .failure(let error):
+                    assertionFailure("Error - \(error)")
                 }
+                self.task = nil
             }
         }
         self.task = task
