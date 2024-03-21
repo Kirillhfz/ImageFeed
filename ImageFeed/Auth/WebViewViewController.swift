@@ -16,7 +16,16 @@ protocol WebViewControllerDelegate: AnyObject {
     func webViewViewControllerDidCancel(_ vc: WebViewController)
 }
 
-final class WebViewController: UIViewController {
+public protocol WebViewControllerProtocol: AnyObject {
+    var presenter: WebViewPresenterProtocol? { get set }
+    func load(request: URLRequest)
+    func setProgressValue(_ newValue: Float)
+    func setProgressHidden(_ isHidden: Bool)
+    func estimatedProgressObservtion()
+}
+
+final class WebViewController: UIViewController & WebViewControllerProtocol {
+    
     
     // MARK: - IB Outlets
     @IBOutlet private var webView: WKWebView!
@@ -26,35 +35,15 @@ final class WebViewController: UIViewController {
     weak var delegate: WebViewControllerDelegate?
     private var estimatedProgressObservation: NSKeyValueObservation?
     private var alertPresenter: AlertPresenterProtocol?
+    var presenter: WebViewPresenterProtocol?
     
     // MARK: - View Life Cycles
     override func viewDidLoad() {
         super.viewDidLoad()
         
         webView.navigationDelegate = self
-        
-        estimatedProgressObservation = webView.observe(
-            \.estimatedProgress,
-             options: [],
-             changeHandler: { [weak self] _, _ in
-                 guard let self = self else { return }
-                 self.updateProgress()
-             })
-        
-        var urlComponents = URLComponents(string: KeyAndUrl.unsplashAuthorizeUrlString)!
-        urlComponents.queryItems = [
-            URLQueryItem(name: "client_id", value: KeyAndUrl.accessKey),
-            URLQueryItem(name: "redirect_uri", value: KeyAndUrl.redirectUrl),
-            URLQueryItem(name: "response_type", value: "code"),
-            URLQueryItem(name: "scope", value: KeyAndUrl.accessScope)
-        ]
-        
-        guard let url = urlComponents.url else { return }
-        let request = URLRequest(url: url)
-        
-        webView.load(request)
-        
-        updateProgress()
+        presenter?.viewDidLoad()
+        alertPresenter = AlertPresenter(delegate: self)
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -65,7 +54,6 @@ final class WebViewController: UIViewController {
             forKeyPath: #keyPath(WKWebView.estimatedProgress),
             options: .new,
             context: nil)
-        updateProgress()
     }
 
     override func viewWillDisappear(_ animated: Bool) {
@@ -79,9 +67,25 @@ final class WebViewController: UIViewController {
     }
     
     // MARK: - Methods
+    
+    func load(request: URLRequest) {
+        webView.load(request)
+    }
+    
+    func estimatedProgressObservtion() {
+        estimatedProgressObservation = webView.observe(
+            \.estimatedProgress,
+             options: [],
+             changeHandler: { [weak self] _, _ in
+                 guard let self = self else { return }
+                 presenter?.didUpdateProgressValue(webView.estimatedProgress)
+             }
+        )
+    }
+    
     override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
         if keyPath == #keyPath(WKWebView.estimatedProgress) {
-            updateProgress()
+            presenter?.didUpdateProgressValue(webView.estimatedProgress)
         } else {
             super.observeValue(forKeyPath: keyPath, of: object, change: change, context: context)
         }
@@ -90,12 +94,17 @@ final class WebViewController: UIViewController {
     func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
         showAlert()
     }
-
-    private func updateProgress() {
-        progressView.progress = Float(webView.estimatedProgress)
-        progressView.isHidden = fabs(webView.estimatedProgress - 1.0) <= 0.0001
+    
+    func setProgressValue(_ newValue: Float) {
+        progressView.progress = newValue
+    }
+    
+    func setProgressHidden(_ isHidden: Bool) {
+        progressView.isHidden = isHidden
     }
 }
+
+
 // MARK: - WKNavigationDelegate
 extension WebViewController: WKNavigationDelegate {
     func webView(
@@ -112,17 +121,10 @@ extension WebViewController: WKNavigationDelegate {
     }
     
     private func code(from navigationAction: WKNavigationAction) -> String? {
-        if
-            let url = navigationAction.request.url,
-            let urlComponents = URLComponents(string: url.absoluteString),
-            urlComponents.path == "/oauth/authorize/native",
-            let items = urlComponents.queryItems,
-            let codeItem = items.first(where: { $0.name == "code" })
-        {
-            return codeItem.value
-        } else {
+        if let url = navigationAction.request.url {
+                return presenter?.code(from: url)
+            }
             return nil
-        }
     }
 }
 
@@ -138,7 +140,7 @@ extension WebViewController {
                 dismiss(animated: true)
             })
         alertPresenter = AlertPresenter(delegate: self)
-        alertPresenter?.showAlert(for: alert)
+        alertPresenter?.showError(for: alert)
     }
     
     static func clean() {

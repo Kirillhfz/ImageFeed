@@ -9,7 +9,7 @@ import Foundation
 import UIKit
 
 protocol AlertPresenterProtocol: AnyObject {
-    func showAlert(for model: AlertModel)
+    func showError(for model: AlertModel)
 }
 
 
@@ -20,7 +20,7 @@ final class AlertPresenter: AlertPresenterProtocol {
         self.delegate = delegate
     }
     
-    func showAlert(for model: AlertModel) {
+    func showError(for model: AlertModel) {
         let alert = UIAlertController(
             title: model.title,
             message: model.message,
@@ -41,7 +41,6 @@ final class AlertPresenter: AlertPresenterProtocol {
             }
         alert.addAction(nextAction)
         }
-        
         delegate?.present(alert, animated: true)
     }
 }
